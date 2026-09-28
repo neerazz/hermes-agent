@@ -46,10 +46,13 @@ try {
   }
   // browser_exec's engine (browser-harness) runs on the store interpreter with only the
   // payload's site dir on PYTHONPATH (tools/browser_use_cli.py); -S drops any site of its own.
+  // Telemetry off as at runtime: its detached sender would outlive the check and pin the
+  // payload dir on Windows (EPERM on the restore rename).
   console.log('— browser-harness on the store interpreter (relocated) —')
   const harness = spawnSync(resolve(moved, manifest.runtime.storePython),
     ['-S', '-m', 'browser_harness.run', '--version'], {
-      cwd: home, env: { ...env, PYTHONPATH: resolve(moved, manifest.runtime.sitePackages) },
+      cwd: home,
+      env: { ...env, ANONYMIZED_TELEMETRY: 'false', PYTHONPATH: resolve(moved, manifest.runtime.sitePackages) },
       stdio: 'inherit', timeout: 120000,
     })
   if (harness.error) throw harness.error
